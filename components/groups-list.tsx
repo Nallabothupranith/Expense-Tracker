@@ -1,6 +1,16 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { Pencil, Trash2 } from "lucide-react";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+  TableCaption,
+} from "@/components/ui/table";
 
 interface Group {
   id: string;
@@ -14,10 +24,8 @@ export default function GroupsList() {
   const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [animate, setAnimate] = useState(false);
 
   useEffect(() => {
-    setAnimate(true);
     fetch("/api/groups")
       .then((res) => res.json())
       .then((data) => {
@@ -32,55 +40,111 @@ export default function GroupsList() {
 
   return (
     <div
-      className={`mt-8 sm:mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-8 transition-all duration-700 ${
-        animate ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
-      }`}
+      className="w-full overflow-x-auto rounded-xl sm:rounded-2xl bg-white/60 backdrop-blur-md shadow-md sm:shadow-xl border border-white/40 mt-6 sm:mt-12 transition-all duration-700"
       style={{ transitionDelay: "500ms" }}
     >
-      {loading && (
-        <div className="col-span-full text-center text-gray-500">
-          Loading groups...
-        </div>
-      )}
-      {error && (
-        <div className="col-span-full text-center text-red-500">{error}</div>
-      )}
-      {!loading && !error && groups.length === 0 && (
-        <div className="col-span-full text-center text-gray-500">
-          No groups found.
-        </div>
-      )}
-      {groups.map((group) => (
-        <div
-          key={group.id}
-          className="bg-white/50 rounded-2xl shadow-lg p-4 sm:p-6 flex flex-col items-center text-center backdrop-blur-md border border-white/40"
-        >
-          <h2 className="text-lg sm:text-2xl font-bold text-[#2d2e82]">
-            {group.name}
-          </h2>
-          {group.members !== undefined && (
-            <p className="text-gray-500 mt-1 sm:mt-2 text-sm sm:text-base">
-              {group.members} members
-            </p>
-          )}
-          {group.total_expense !== undefined && (
-            <p className="text-2xl sm:text-3xl font-extrabold text-green-500 mt-2 sm:mt-4">
-              ${group.total_expense}
-            </p>
-          )}
-          {group.description && (
-            <p className="text-gray-500 text-xs sm:text-sm mt-2">
-              {group.description}
-            </p>
-          )}
-          <Link
-            href={`/groups/${group.id}`}
-            className="mt-4 sm:mt-6 w-full px-4 sm:px-5 py-2 rounded-full bg-[#7b8cff] font-semibold text-white hover:bg-[#2d2e82] transition-all shadow-md text-base text-center"
-          >
-            View Details
-          </Link>
-        </div>
-      ))}
+      <div className="min-w-[600px] sm:min-w-0">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="min-w-[120px] px-1 sm:px-2 py-2 sm:py-3 text-[11px] sm:text-sm">
+                Group Name
+              </TableHead>
+              <TableHead className="min-w-[80px] px-1 sm:px-2 py-2 sm:py-3 text-[11px] sm:text-sm">
+                Members
+              </TableHead>
+              <TableHead className="min-w-[100px] px-1 sm:px-2 py-2 sm:py-3 text-[11px] sm:text-sm text-right">
+                Total Expense
+              </TableHead>
+              <TableHead className="min-w-[120px] px-1 sm:px-2 py-2 sm:py-3 text-[11px] sm:text-sm">
+                Description
+              </TableHead>
+              <TableHead className="min-w-[100px] px-1 sm:px-2 py-2 sm:py-3 text-[11px] sm:text-sm">
+                Actions
+              </TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {loading && (
+              <TableRow>
+                <TableCell
+                  colSpan={5}
+                  className="text-center text-gray-500 py-6 sm:py-8 text-xs sm:text-base"
+                >
+                  Loading groups...
+                </TableCell>
+              </TableRow>
+            )}
+            {error && (
+              <TableRow>
+                <TableCell
+                  colSpan={5}
+                  className="text-center text-red-500 py-6 sm:py-8 text-xs sm:text-base"
+                >
+                  {error}
+                </TableCell>
+              </TableRow>
+            )}
+            {!loading && !error && groups.length === 0 && (
+              <TableRow>
+                <TableCell
+                  colSpan={5}
+                  className="text-center text-gray-500 py-6 sm:py-8 text-xs sm:text-base"
+                >
+                  No groups found.
+                </TableCell>
+              </TableRow>
+            )}
+            {!loading &&
+              !error &&
+              groups.map((group) => (
+                <TableRow key={group.id}>
+                  <TableCell className="font-bold text-[#2d2e82] px-1 sm:px-2 py-2 sm:py-3 text-[12px] sm:text-base">
+                    {group.name}
+                  </TableCell>
+                  <TableCell className="px-1 sm:px-2 py-2 sm:py-3 text-[12px] sm:text-base">
+                    {group.members !== undefined ? group.members : "-"}
+                  </TableCell>
+                  <TableCell className="font-extrabold text-green-500 px-1 sm:px-2 py-2 sm:py-3 text-[12px] sm:text-base text-right">
+                    {group.total_expense !== undefined
+                      ? `$${group.total_expense}`
+                      : "-"}
+                  </TableCell>
+                  <TableCell className="px-1 sm:px-2 py-2 sm:py-3 text-[12px] sm:text-base">
+                    {group.description || "-"}
+                  </TableCell>
+                  <TableCell className="flex gap-1 sm:gap-2 items-center px-1 sm:px-2 py-2 sm:py-3">
+                    <Link
+                      href={`/groups/${group.id}`}
+                      className="px-2 py-1 rounded bg-[#7b8cff] text-white hover:bg-[#2d2e82] transition-all text-[11px] sm:text-sm"
+                      title="View Details"
+                    >
+                      View
+                    </Link>
+                    <button
+                      className="p-2 rounded hover:bg-blue-100"
+                      title="Edit Group"
+                    >
+                      <Pencil className="w-4 h-4 text-blue-600" />
+                    </button>
+                    <button
+                      className="p-2 rounded hover:bg-red-100"
+                      title="Delete Group"
+                    >
+                      <Trash2 className="w-4 h-4 text-red-600" />
+                    </button>
+                  </TableCell>
+                </TableRow>
+              ))}
+          </TableBody>
+          <TableCaption className="text-center text-[11px] sm:text-xs">
+            {!loading && !error && groups.length === 0 && "No groups found."}
+          </TableCaption>
+        </Table>
+      </div>
+      <div className="block sm:hidden text-center text-[10px] text-gray-400 pt-1 pb-2">
+        Swipe &rarr; to see more
+      </div>
     </div>
   );
 }
